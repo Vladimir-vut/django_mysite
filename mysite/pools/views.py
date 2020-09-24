@@ -1,27 +1,45 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.http import Http404
 
 from .models import Question
 
 
 # Create your views here.
 
+
 def index(request):
-    latest_question_list = Question.objects.order_by('pub_date')[:5]
+    try:
+        latest_question_list = Question.objects.order_by('pub_date')[:5]
+    except Question.DoesNotExist:
+        raise Http404('Question does not exist')
     context = {
         'latest_question_list': latest_question_list,
     }
-    return render(request, 'pool/index.html', context)
+    return render(request, 'pools/index.html', context)
 
 
 def detail(request, question_id):
-    return render('You\'re looking at question {}.'.format(question_id))
+    question = get_object_or_404(Question, pk=question_id)
+    context = {
+        'question': question
+    }
+    return render(request, 'pools/detail.html', context)
 
 
 def results(request, question_id):
-    response = 'You\'re looking at the results of question '
-    return HttpResponse(response+str(question_id))
+    question = get_object_or_404(Question, pk=question_id)
+    context = {
+        'question': question
+    }
+    return render(request, 'pools/results.html', context)
 
 
 def vote(request, question_id):
-    return HttpResponse('You\'re voting on question {}.'.format(question_id))
+    question = get_object_or_404(Question, pk=question_id)
+    context = {
+        'question': question
+    }
+    return render(request, 'pools/vote.html', context)
+
+
 
